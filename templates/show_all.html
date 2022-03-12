@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+
+<h3>
+    <a href="{{ url_for('show_all') }}">Flask
+        SQLAlchemy example</a>
+</h3>
+
+<hr/>
+{%- for message in get_flashed_messages() %}
+    {{ message }}
+{%- endfor %}
+
+<h3>Links (<a href="{{ url_for('new') }}">Add Link
+</a>)</h3>
+
+<table>
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>Name</th>
+        <th>Counter</th>
+        <th>URL</th>
+        <th>Visit</th>
+        <th>Firebase stats</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for link in links %}
+        <tr>
+            <td>{{ link.id }}</td>
+            <td>{{ link.name }}</td>
+            <td>{{ link.counter }}</td>
+            <td>{{ link.url }}</td>
+            <td>
+                <a href="{{url_for('visit',link_id=link.id)}}" >visit</a>
+            </td>
+            <td>
+                <a href="{{url_for('statistics',link_id=link.id)}}" >stats</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
