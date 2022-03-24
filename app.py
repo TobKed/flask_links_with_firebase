@@ -1,3 +1,5 @@
+import os
+
 from urllib.parse import urlencode
 
 from flask import Flask, flash, redirect, url_for, render_template, request
@@ -99,4 +101,4 @@ def new():
 
 if __name__ == "__main__":
     db.create_all()
-    app.run(host=HOST, port=PORT)
+    app.run(host=HOST, port=HOST_PORT)
