@@ -1,13 +1,12 @@
 import os
-
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 from flask import Flask, flash, redirect, url_for, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 from google.oauth2 import service_account
-from google.auth.transport.requests import AuthorizedSession, Request
+from google.auth.transport.requests import AuthorizedSession
 
 
 HOST_PORT = int(os.getenv("HOST_PORT", "80"))
@@ -70,15 +69,23 @@ def visit(link_id):
 @app.route("/stats/<link_id>")
 def statistics(link_id):
     link = Links.query.filter(Links.id == int(link_id)).first()
-    if link is not None:
-        url = urlencode({"": link.url}).lstrip("=")
-        authed_session = AuthorizedSession(credentials)
-        response = authed_session.get(
-            f"https://firebasedynamiclinks.googleapis.com/v1/"
-            f"{url}/linkStats?durationDays={STATS_DURATION}"
-        )
-        return response.json(), response.status_code
-    return f"Link {link_id} not found", 404
+    if not link:
+        return f"Link {link_id} not found", 404
+
+    url = quote(link.url, safe="")
+    authed_session = AuthorizedSession(credentials)
+    response = authed_session.get(
+        f"https://firebasedynamiclinks.googleapis.com/v1/"
+        f"{url}/linkStats?durationDays={STATS_DURATION}"
+    )
+
+    try:
+        response.raise_for_status()
+    except Exception as e:
+        return str(e), 400
+
+    count = sum(int(i["count"]) for i in response.json()["linkEventStats"] if i["event"] == "CLICK")
+    return {"count": count}, response.status_code
 
 
 @app.route("/new", methods=["GET", "POST"])
