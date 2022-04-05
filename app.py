@@ -83,9 +83,9 @@ def statistics(link_id):
         response.raise_for_status()
     except Exception as e:
         return str(e), 400
-
-    count = sum(int(i["count"]) for i in response.json()["linkEventStats"] if i["event"] == "CLICK")
-    return {"count": count}, response.status_code
+    response_json = response.json()
+    count = sum(int(i["count"]) for i in response_json.get("linkEventStats", []) if i["event"] == "CLICK")
+    return {"count": count, "status_code": response.status_code, "response_json": response_json}, response.status_code
 
 
 @app.route("/new", methods=["GET", "POST"])
